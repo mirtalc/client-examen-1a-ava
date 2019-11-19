@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+	<script>
+		// Por variar
+		window.onload = inicio;
+
+		function inicio() {
+			let idArt = prompt("Introduce la id del articulo que quieres consultar", "1");
+
+			if (idArt != null) {
+				if (Number(idArt)) {
+					getArticulo(parseFloat(idArt));
+				} else {
+					alert("Debes poner un número entero. Si no, no vas a encontrar nada.");
+				}
+			} else {
+				alert("No has introducido nada. Vaya...");
+			}
+		}
+
+		function getArticulo(idArt) {
+			let http = new XMLHttpRequest;
+
+			http.addEventListener("readystatechange", function () {
+				if (http.readyState == 4) {	// Cuando haya acabado
+					if (http.status == 200) {
+						console.log("OK, el articulo existía. Buscaremos su categoría.");
+						let articulo = JSON.parse(http.responseText);
+						idCategoria = articulo.categoria;
+
+						getCategoria(idCategoria);
+					} else {
+						console.log("Error articulo " + http.status + " (" + http.statusText + "); no hemos podido obtener el artículo con id " + idArt);
+					}
+				}
+			});
+
+			// Realizamos petición después de asignar el listener.
+			http.open("GET", "http://localhost:3000/articulos/" + idArt);
+			http.send();
+		}
+
+		function getCategoria(idCategoria) {
+			let http = new XMLHttpRequest();
+
+			http.addEventListener("readystatechange", function () {
+				if (http.readyState == 4) {
+					if (http.status == 200) {
+						let categoria = JSON.parse(http.responseText);
+						console.log("La categoría de tu artículo es: " + categoria.nombre);
+					} else {
+						console.log("Error categoría " + http.status + " (" + http.statusText + "); no hemos podido obtener la categoría con id " + idCategoria);
+					}
+				}
+			});
+
+			// Realizamos petición después de asignar el listener.
+			http.open("GET", "http://localhost:3000/categorias/" + idCategoria);
+			http.send();
+		}
+
+	</script>
+
+</head>
+
+<body>
+	<p>¡Hola! Aquí no mostraremos nada, mira la consola</p>
+	<p>Ejemplos para probar artículos: </p>
+	<ul>
+		<li>id 1 --- OK: el artículo existe y la categoría también</li>
+		<li>id 100 --- OK: ídem, pero la id está almacenadas sin comillas</li>
+		<li>id 1000 --- ERROR: el artículo existe, pero la categoría no</li>
+		<li>id 1234 --- ERROR: el artículo no existe</li>
+	</ul>
+
+	<p>Para preguntar por más artículos, recarga la página.</p>
+
+
+</body>
+
+</html>
